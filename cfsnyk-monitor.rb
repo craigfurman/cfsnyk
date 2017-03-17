@@ -2,6 +2,7 @@
 
 require 'json'
 require 'tmpdir'
+require 'fileutils'
 
 target_app = ARGV[0]
 target_file = ARGV[1]
@@ -16,6 +17,7 @@ app_guid = app_metadata['metadata']['guid']
 Dir.mktmpdir do |dir|
   Dir.chdir(dir) do
     `cf curl /v2/apps/#{app_guid}/droplet/download | tar -x`
-    puts `snyk test ./app --file=#{target_file} --json`
+    FileUtils.mv('./app', target_app) # snyk uses dirname as the project name, for Ruby
+    puts `snyk monitor #{target_app} --file=#{target_file}`
   end
 end
